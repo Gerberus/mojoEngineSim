@@ -263,16 +263,16 @@ void startPlayback()
   audioRunning = true;
 
   // Set up Timer 2 to do pulse width modulation on the speaker pin.
-  ASSR &= ~(_BV(EXCLK) | _BV(AS2));                         // Use internal clock (datasheet p.160)
+  //ASSR &= ~(_BV(EXCLK) | _BV(AS2));                         // Use internal clock (datasheet p.160)
 
-  TCCR2A |= _BV(WGM21) | _BV(WGM20);                        // Set fast PWM mode  (p.157)
-  TCCR2B &= ~_BV(WGM22);
+  TCCR3A |= _BV(WGM31) | _BV(WGM30);                        // Set fast PWM mode  (p.157)
+  TCCR3B &= ~_BV(WGM32);
 
-  TCCR2A = (TCCR2A | _BV(COM2B1)) & ~_BV(COM2B0);           // Do non-inverting PWM on pin OC2B (p.155)
-  TCCR2A &= ~(_BV(COM2A1) | _BV(COM2A0));                   // On the Arduino this is pin 3.
-  TCCR2B = (TCCR2B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10); // No prescaler (p.158)
+  TCCR3A = (TCCR3A | _BV(COM3B1)) & ~_BV(COM3B0);           // Do non-inverting PWM on pin OC2B (p.155)
+  TCCR3A &= ~(_BV(COM3A1) | _BV(COM3A0));                   // On the Arduino this is pin 3.
+  TCCR3B = (TCCR3B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10); // No prescaler (p.158)
 
-  OCR2B = pgm_read_byte(&idle_data[0]);                     // Set initial pulse width to the first sample.
+  OCR3B = pgm_read_byte(&idle_data[0]);                     // Set initial pulse width to the first sample.
 
   // Set up Timer 1 to send a sample every interrupt.
   cli();
@@ -315,7 +315,7 @@ void stopPlayback()
 
   TIMSK1 &= ~_BV(OCIE1A); // Disable playback per-sample interrupt.
   TCCR1B &= ~_BV(CS10);   // Disable the per-sample timer completely.
-  TCCR2B &= ~_BV(CS10);   // Disable the PWM timer.
+  TCCR3B &= ~_BV(CS10);   // Disable the PWM timer.
 
   digitalWrite(SPEAKER, LOW);
 }
@@ -370,7 +370,7 @@ ISR(TIMER1_COMPA_vect) {
     curEngineSample = 0;
   }
 
-  OCR2B = pgm_read_byte(&idle_data[curEngineSample]);
+  OCR3B = pgm_read_byte(&idle_data[curEngineSample]);
 
   ++curEngineSample;
 
